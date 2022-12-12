@@ -139,7 +139,7 @@ def clean_workflow(msg_csv, cat_csv, db):
     df = remove_duplicates(df)
     
     # add to sql database
-    df.to_sql(db, engine, index=False)
+    df.to_sql(db, engine, index=False, if_exists='replace')
     
     return df
     
