@@ -30,7 +30,15 @@ nltk.download(['punkt', 'wordnet', 'stopwords'])
 
 def load_data(database_filepath):
     '''
+    Load data from messages and categories files
     
+    INPUTS:
+    database_filepath - File path to database that was created using 'process_data.py'
+    
+    OUTPUTS:
+    X - Variable columns/array
+    y - target/predictor column/array
+    df - full dataframe from sql database    
     
     '''
     # load data from database
@@ -43,10 +51,16 @@ def load_data(database_filepath):
 
 def tokenize(text):
     '''
+    Normalize case and remove punctuation
     
+    INPUTS:
+    text - text data for a single message in the dataset
+    
+    OUTPUTS:
+    clean_tokens - tokenized text
     
     '''
-    # normalize case and remove punctuation
+    
     text = re.sub(r"[^0-9a-zA-Z]"," ",text.lower())
 
     tokens = word_tokenize(text)
@@ -63,27 +77,53 @@ def tokenize(text):
 
 def build_model():
     '''
+    Build a ML model. Utilise Pipeline to automate the pre-processing data task and then use Gridsearch to optimise the ML model (In this case SGDClassifier).
     
+    The parameters of the model can be changed by editing the 'parameters' dictionary.
+    
+    INPUTS:
+    None
+    
+    OUTPUTS:
+    cv - optimised ML model using SGDClassifier
     
     '''
     pipeline = Pipeline([
-        ('vect', CountVectorizer(tokenizer=tokenize, 
-                             stop_words='english', 
-                             ngram_range=(1,1), 
-                                 max_df=0.5, 
-                                 max_features=5000)),
-        ('tfidf', TfidfTransformer(use_idf=True, norm='l1')),
-        ('clf', MultiOutputClassifier(SGDClassifier()))
-        ])
-    
+        ('vect', CountVectorizer(tokenizer=tokenize, stop_words='english',
+                                ngram_range=(1,1),
+                                max_df=0.5
+                                )),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(SGDClassifier()))])
 
+    parameters = {
+        #'vect__ngram_range': ((1,1),(1,2)),
+        #'vect__max_df' : (0.5,1.0),
+        #'vect__max_features': (None, 5000),
+        'tfidf__use_idf' : (True, False),
+        #'tfidf__norm': ('l1','l2'),
+        #'clf__estimator__alpha' :(0.00001, 0.000001)
+    }
     
-    return pipeline
+    print("\n\t[INFO] Creating pipeline using parameters - %s" %parameters)
+    
+    cv = GridSearchCV(pipeline, param_grid=parameters, verbose=2.1, n_jobs=-1)
+
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, df):
     '''
+    Evaluate and display the results of the optimised model
     
+    INPUTS:
+    model - optimised model
+    X_test - varibale columns/array
+    Y_test - target/predictor array/column
+    df - dataframe that holds X_test and Y_test
+    
+    OUTPUTS:
+    print statements
     
     '''
     y_pred = model.predict(X_test)
@@ -100,7 +140,11 @@ def evaluate_model(model, X_test, Y_test, df):
 
 def save_model(model, model_filepath):
     '''
+    Save the ML model as a pickle file
     
+    INPUTS:
+    model - optimised model
+    model_path - filepath to the save location of the pickle file
     
     '''    
     model_pickled_object = pickle.dump(model, open(model_filepath, 'wb'))
