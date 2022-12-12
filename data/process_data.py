@@ -65,6 +65,8 @@ def cat_cols_to_binary(df):
 
         # convert column from string to numeric
         df[column] = pd.to_numeric(df[column])
+        
+    df = df[df.related != 2]
     return df
 
 def replace_cat_cols(df, cat_df):
