@@ -68,7 +68,17 @@ A flask web app that:
 
 The ML pipeline I have created has successfully cleans and adds data to a sql database. It then has the ability to classify messages.
 
-The final classification is far from perfect and still has room for additional improvements.
+The final classification is far from perfect and still has room for additional improvements. Accuracy stands at around 95% but this isn't reflective of the effectiveness of the ML model due to an imbalnace in the data (ie some labels like water have few examples)
+
+This imbalance affects training the model as the Accuracy score tends to be around 95% but this is only really reflecting the fact that the vast majority of the data for each column is a 0 rather than a 1. During training the model will likely default to 0 which will inherently create a more accurate model. 
+
+With this being said, it should then be more important to focus on recall as the parameter to decide the efectiveness of the model. The is because recall measures the model's ability to detect positive samples. The higher the recall, the more positive samples detected and thus the more likely the correct emergency responses will be classified.
+
+To combat this imbalanced dataset, we could try these 4 things:
+- Resample differently. Over-sample from your minority class and under-sample from your majority class, so you get a more balanced dataset.
+- Try different metrics other than correct vs wrong prediction. Try Confusion Matrix or ROC curve. Accuracy is divided into sensitivity and specificity and models can be chosen based on the balance thresholds of the values.
+- Use Penalized Models. Like penalized-SVM and penalized-LDA. These put additional cost on the model for making classification mistakes on the minority class during training. These penalties can bias the model towards paying attention to minority class.
+- Try Anomaly Detection techniques and models 
 
 ## Licensing, Authors, and Acknowledgements <a name="licensing"></a>
 
